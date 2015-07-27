@@ -54,6 +54,21 @@ class SiegelSpec: QuickSpec {
             }
         }
 
+        describe("exists") {
+            it("returns") {
+                let cache = Siegel<Int?>(size: 3)
+                cache.set(key: "a", value: 1)
+                cache.set(key: "b", value: nil)
+
+                expect(cache.exists(key: "a")).to(beTrue())
+                expect(cache.exists(key: "b")).to(beTrue())  // optional type can contain nil
+                expect(cache.exists(key: "c")).to(beFalse())
+
+                cache.remove(key: "b")
+                expect(cache.exists(key: "b")).to(beFalse())
+            }
+        }
+
         describe("remove") {
             it("removes entry") {
                 let cache = Siegel<Int>(size: 3)

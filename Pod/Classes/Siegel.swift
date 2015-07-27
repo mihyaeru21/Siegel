@@ -44,6 +44,10 @@ public class Siegel<T> {
         return nil
     }
 
+    public func exists(#key: String) -> Bool {
+        return self.entries[key] != nil
+    }
+
     public func remove(#key: String) -> T? {
         if let weakValueRef = self.entries.removeValueForKey(key) {
             self.fifo = self.fifo.filter { elem in elem.key != key }
