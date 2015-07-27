@@ -11,8 +11,8 @@ import Foundation
 public class Siegel<T> {
     private let size: Int
     private let gcFactor: Int
-    private var fifo: [(key: String, valueRef: Ref<T>?)]
-    private var entries: [String: Weak<Ref<T>>?]
+    private var fifo: [(key: String, valueRef: Ref<T>)]
+    private var entries: [String: Weak<Ref<T>>]
 
     public init(size: Int = 1024, gcFactor: Int = 10) {
         self.size     = size
@@ -22,19 +22,13 @@ public class Siegel<T> {
     }
 
     public func set(#key: String, value: T) -> T {
-        if var oldValue = self.entries[key] {
-            oldValue = nil
-        }
-
-        // register
         let valueRef = Ref<T>(value: value)
         self.entries[key] = Weak<Ref<T>>(value: valueRef)
         self.updateFifo(key, valueRef: valueRef)
 
-        // expire the oldest entry if full
         while self.entries.count > self.size {
             let expireKey = self.fifo.removeAtIndex(0).0
-            if self.entries[expireKey]??.value == nil {
+            if self.entries[expireKey]?.value == nil {
                 self.entries.removeValueForKey(expireKey)
             }
         }
@@ -44,23 +38,14 @@ public class Siegel<T> {
 
     public func get(#key: String) -> T? {
         if let weakValueRef = self.entries[key] {
-            self.updateFifo(key, valueRef: weakValueRef?.value)
-            return weakValueRef?.value?.value
+            self.updateFifo(key, valueRef: weakValueRef.value!)
+            return weakValueRef.value?.value
         }
-        else {
-            return nil
-        }
+        return nil
     }
 
     public func remove(#key: String) -> T? {
-        if var weakValueRef = self.entries.removeValueForKey(key) {
-            let value = weakValueRef?.value?.value
-            weakValueRef = nil
-            return value
-        }
-        else {
-            return nil
-        }
+        return self.entries.removeValueForKey(key)?.value?.value
     }
 
     public func clear() {
@@ -68,10 +53,10 @@ public class Siegel<T> {
         self.entries = [:]
     }
 
-    private func updateFifo(key: String, valueRef: Ref<T>?) {
+    private func updateFifo(key: String, valueRef: Ref<T>) {
         self.fifo.append((key: key, valueRef: valueRef))
         if self.fifo.count >= self.size * self.gcFactor {
-            var newFifo: [(key: String, valueRef: Ref<T>?)] = []
+            var newFifo: [(key: String, valueRef: Ref<T>)] = []
             var need = self.entries
             while need.count > 0 {
                 let fifoEntry = self.fifo.removeLast()
