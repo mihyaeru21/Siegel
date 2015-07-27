@@ -1,4 +1,10 @@
-// https://github.com/Quick/Quick
+//
+//  SiegelSpec.swift
+//  Siegel
+//
+//  Created by Mihyaeru on 7/24/15.
+//  Copyright (c) 2015 CocoaPods. All rights reserved.
+//
 
 import Quick
 import Nimble
@@ -81,5 +87,40 @@ class SiegelSpec: QuickSpec {
                 expect(cache.get(key: "c")).to(beNil())
             }
         }
+
+        describe("destroy") {
+            it("destroys containing entry") {
+                let cache = Siegel<Hoge>(size: 3)
+                cache.set(key: "a", value: Hoge())
+                cache.set(key: "b", value: Hoge())
+                cache.set(key: "c", value: Hoge())
+                expect(Hoge.initCount)   == 3
+                expect(Hoge.deinitCount) == 0
+
+                cache.set(key: "d", value: Hoge())
+                expect(Hoge.initCount)   == 4
+                expect(Hoge.deinitCount) == 1
+
+                cache.remove(key: "b")
+                expect(Hoge.initCount)   == 4
+                expect(Hoge.deinitCount) == 2
+
+                cache.clear()
+                expect(Hoge.initCount)   == 4
+                expect(Hoge.deinitCount) == 4
+            }
+        }
+    }
+}
+
+class Hoge {
+    static var initCount = 0
+    init() {
+        Hoge.initCount++
+    }
+
+    static var deinitCount = 0
+    deinit {
+        Hoge.deinitCount++
     }
 }

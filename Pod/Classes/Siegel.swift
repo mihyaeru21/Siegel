@@ -45,7 +45,11 @@ public class Siegel<T> {
     }
 
     public func remove(#key: String) -> T? {
-        return self.entries.removeValueForKey(key)?.value?.value
+        if let weakValueRef = self.entries.removeValueForKey(key) {
+            self.fifo = self.fifo.filter { elem in elem.key != key }
+            return weakValueRef.value?.value
+        }
+        return nil
     }
 
     public func clear() {
