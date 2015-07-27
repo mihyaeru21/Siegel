@@ -61,6 +61,15 @@ public class Siegel<T> {
         self.entries = [:]
     }
 
+    public subscript(key: String) -> T? {
+        get {
+            return self.get(key: key)
+        }
+        set(value) {
+            self.set(key: key, value: value!)
+        }
+    }
+
     private func updateFifo(key: String, valueRef: Ref<T>) {
         self.fifo.append((key: key, valueRef: valueRef))
         if self.fifo.count >= self.size * self.gcFactor {

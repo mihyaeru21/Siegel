@@ -103,6 +103,16 @@ class SiegelSpec: QuickSpec {
             }
         }
 
+        describe("subscript") {
+            it("can set/get vlaue") {
+                let cache = Siegel<Int>(size: 3)
+
+                expect(cache["a"]).to(beNil())
+                cache["a"] = 1
+                expect(cache["a"]) == 1
+            }
+        }
+
         describe("destroy") {
             it("destroys containing entry") {
                 let cache = Siegel<Hoge>(size: 3)
